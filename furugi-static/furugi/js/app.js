@@ -30,27 +30,52 @@ function addToCart(id) { const c = getCart(); if (!c.includes(id)) setCart([...c
 function removeFromCart(id) { setCart(getCart().filter((x) => x !== id)); }
 function updateCartCount() { const el = $("#cart-count"); if (el) el.textContent = getCart().length; }
 
+/* ---------- theme (light/dark) ---------- */
+const THEME_KEY = "furugi-theme";
+function getTheme() {
+  try { return localStorage.getItem(THEME_KEY) || "dark"; } catch (e) { return "dark"; }
+}
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const headerMark = $("#header-mark"), footerMark = $("#footer-mark"), toggle = $("#theme-toggle");
+  if (headerMark) headerMark.src = theme === "light" ? "images/brand-mark-light.svg" : "images/brand-mark.svg";
+  if (footerMark) footerMark.src = theme === "light" ? "images/footer-mark-light.svg" : "images/footer-mark-dark.svg";
+  if (toggle) toggle.textContent = theme === "light" ? "\u25cf Dark mode" : "\u2600 Light mode";
+}
+function setTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+  applyTheme(theme);
+}
+applyTheme(getTheme()); // run immediately, before the DOM below paints, to avoid a flash of the wrong theme
+
 /* ---------- shared header and footer ---------- */
 function renderChrome() {
   const page = document.body.dataset.page;
   const cur = (name) => (page === name ? ' aria-current="page"' : "");
+  const theme = getTheme();
   $("#site-header").innerHTML = `
     <header class="site-header"><div class="wrap">
       <a class="brand" href="index.html" aria-label="${esc(CONFIG.shopName)}">
-        <img class="brand-mark" src="images/brand-mark.svg" alt="${esc(CONFIG.shopName)}\u00b0">
+        <img class="brand-mark" id="header-mark" src="images/${theme === "light" ? "brand-mark-light" : "brand-mark"}.svg" alt="${esc(CONFIG.shopName)}\u00b0">
       </a>
       <nav class="nav" aria-label="Main">
         <a href="shop.html"${cur("shop")}>Shop</a>
         <a href="about.html"${cur("about")}>How it works</a>
         <a href="cart.html"${cur("cart")}>Cart<span class="cart-count" id="cart-count">0</span></a>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch between light and dark mode"></button>
       </nav>
     </div></header>`;
   $("#site-footer").innerHTML = `
     <footer class="site-footer"><div class="wrap">
-      <div><h3>${esc(CONFIG.shopName)}</h3><p>Secondhand clothes from Japan, sold in ${esc(CONFIG.location)}.</p></div>
+      <div>
+        <img class="footer-mark" id="footer-mark" src="images/${theme === "light" ? "footer-mark-light" : "footer-mark-dark"}.svg" alt="${esc(CONFIG.shopName)}\u00b0 by KELXSII 001">
+        <p>Secondhand clothes from Japan, sold in ${esc(CONFIG.location)}.</p>
+      </div>
       <div><h3>Order</h3><p>Message us on <a href="https://wa.me/${CONFIG.whatsapp}">WhatsApp</a>. Delivery in Thimphu, pickup, or courier to other dzongkhags.</p></div>
       <div><h3>Pay</h3><p>Cash on delivery, mBoB, mPay or bank transfer.</p></div>
     </div></footer>`;
+  $("#theme-toggle").addEventListener("click", () => setTheme(getTheme() === "light" ? "dark" : "light"));
+  applyTheme(theme); // sets the toggle label and re-confirms image src now that the elements exist
   updateCartCount();
 }
 
@@ -65,8 +90,9 @@ function tagHTML(p) {
 }
 function cardHTML(p) {
   const img = p.image ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">` : "";
+  const badge = p.bestseller && !p.sold ? '<span class="best-badge">Best seller</span>' : "";
   return `<li><a class="card" href="product.html?id=${p.id}">
-    <div class="card-img" style="--swatch:${p.color}">${img}<span class="tag-no">${p.id}</span>${p.sold ? '<span class="stamp">Sold</span>' : ""}</div>
+    <div class="card-img" style="--swatch:${p.color}">${img}${badge}<span class="tag-no">${p.id}</span>${p.sold ? '<span class="stamp">Sold</span>' : ""}</div>
     <h3>${esc(p.name)}</h3>
     <p class="meta">Size ${esc(p.size)}, grade ${p.grade}</p>
     <p class="price">${fmt(p.price)}</p></a></li>`;
@@ -75,17 +101,30 @@ const categories = () => [...new Set(PRODUCTS.map((p) => p.cat))];
 
 /* ---------- pages ---------- */
 function initHome() {
-  const live = PRODUCTS.filter((p) => !p.sold).sort((a, b) => b.id.localeCompare(a.id));
-  $("#rail").innerHTML = live.slice(0, 6).map(tagHTML).join("");
+  const live = PRODUCTS.filter((p) => !p.sold);
+  const featured = live.filter((p) => p.bestseller);
+  const rest = live.filter((p) => !p.bestseller).sort((a, b) => b.id.localeCompare(a.id));
+  const railItems = featured.concat(rest).slice(0, 6); // best sellers first, newest pieces fill any remaining spots
+  $("#rail").innerHTML = railItems.map(tagHTML).join("");
   $("#cats").innerHTML = categories().map((c) => {
     const n = PRODUCTS.filter((p) => p.cat === c && !p.sold).length;
     return `<li><a href="shop.html?cat=${encodeURIComponent(c)}">${esc(c)}<span>${n} in stock</span></a></li>`;
   }).join("");
-  $("#latest").innerHTML = live.slice(0, 8).map(cardHTML).join("");
+  $("#latest").innerHTML = live.sort((a, b) => b.id.localeCompare(a.id)).slice(0, 8).map(cardHTML).join("");
 }
 
 function initShop() {
   const params = new URLSearchParams(location.search);
+  const bestsellers = PRODUCTS.filter((p) => p.bestseller && !p.sold);
+  const bsWrap = $("#bestsellers");
+  if (bsWrap) {
+    if (bestsellers.length) {
+      bsWrap.hidden = false;
+      bsWrap.querySelector(".grid").innerHTML = bestsellers.map(cardHTML).join("");
+    } else {
+      bsWrap.hidden = true;
+    }
+  }
   const catSel = $("#f-cat"), sizeSel = $("#f-size"), sortSel = $("#f-sort"), stockSel = $("#f-stock");
   catSel.innerHTML = '<option value="">All</option>' + categories().map((c) => `<option>${esc(c)}</option>`).join("");
   const sizes = [...new Set(PRODUCTS.map((p) => p.size))];
