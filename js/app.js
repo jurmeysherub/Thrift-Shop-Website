@@ -106,6 +106,16 @@ function initHome() {
   const rest = live.filter((p) => !p.bestseller).sort((a, b) => b.id.localeCompare(a.id));
   const railItems = featured.concat(rest).slice(0, 6); // best sellers first, newest pieces fill any remaining spots
   $("#rail").innerHTML = railItems.map(tagHTML).join("");
+  const rail = $("#rail");
+  rail.addEventListener("click", (e) => {
+    const tag = e.target.closest("a.tag");
+    if (!tag || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return; // let ctrl/cmd-click open a new tab normally
+    e.preventDefault();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { location.href = tag.href; return; }
+    rail.classList.add("is-pulling");
+    tag.closest("li").classList.add("pulling");
+    setTimeout(() => { location.href = tag.href; }, 650);
+  });
   $("#cats").innerHTML = categories().map((c) => {
     const n = PRODUCTS.filter((p) => p.cat === c && !p.sold).length;
     return `<li><a href="shop.html?cat=${encodeURIComponent(c)}">${esc(c)}<span>${n} in stock</span></a></li>`;
@@ -220,6 +230,12 @@ function initCart() {
   });
   render();
 }
+
+window.addEventListener("pageshow", () => { // browser back button restores the page mid-animation, so reset it
+  document.querySelectorAll(".pulling").forEach((li) => li.classList.remove("pulling"));
+  document.querySelectorAll(".is-pulling").forEach((el) => el.classList.remove("is-pulling"));
+});
+
 
 /* ---------- boot ---------- */
 document.addEventListener("DOMContentLoaded", () => {

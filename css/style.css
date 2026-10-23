@@ -101,8 +101,8 @@ p { margin: 0; max-width: 62ch; }
 .hero-copy h1 { max-width: 16ch; }
 .hero-copy p { margin-top: var(--s2); font-size: 1.15rem; color: var(--ink-dim); }
 .hero-actions { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
-.rail { position: relative; }
-.rail-label { position: absolute; top: 0; left: 0; margin: -.65rem 0 0; padding: 0 .25rem; background: var(--hero-g1); color: var(--kraft); font: 700 .75rem var(--display); text-transform: uppercase; letter-spacing: .08em; }
+.rail { position: relative; margin-top: 2rem; }
+.rail-label { position: absolute; top: -1.9rem; left: 1.25rem; margin: 0; padding: 0; background: none; color: var(--kraft); font: 700 .75rem var(--display); text-transform: uppercase; letter-spacing: .12em; }
 .rail::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--kraft); opacity: .5; }
 .rail-row { list-style: none; margin: 0; padding: 2.75rem 1.25rem 3rem; display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x proximity; }
 .rail-row li { flex: none; position: relative; scroll-snap-align: start; transform-origin: 50% -2.75rem; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .3)); animation: sway 5s ease-in-out infinite alternate; }
@@ -125,6 +125,14 @@ p { margin: 0; max-width: 62ch; }
 .tag-price { margin-top: auto; font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
 @keyframes swing { 0% { rotate: 0deg } 20% { rotate: 6deg } 45% { rotate: -4.5deg } 70% { rotate: 2deg } 100% { rotate: 0deg } }
 @keyframes sway { from { rotate: -1.1deg } to { rotate: 1.1deg } }
+
+/* click: the tag is pulled down on its string, then the product page opens */
+.rail-row li.pulling { animation-play-state: paused; z-index: 2; }
+.rail-row li.pulling .tag { animation: pullTag .65s cubic-bezier(.45, 0, .2, 1) forwards; }
+.rail-row li.pulling::after { animation: pullString .65s cubic-bezier(.45, 0, .2, 1) forwards; }
+.rail-row.is-pulling li:not(.pulling) { opacity: .35; transition: opacity .3s; }
+@keyframes pullTag { 0% { translate: 0 0 } 22% { translate: 0 -5px } 75% { translate: 0 26px } 100% { translate: 0 22px; scale: 1.06 } }
+@keyframes pullString { 0% { height: calc(2.75rem + 17px) } 22% { height: calc(2.75rem + 12px) } 75% { height: calc(2.75rem + 43px) } 100% { height: calc(2.75rem + 39px) } }
 
 /* ---------- Category links ---------- */
 .cats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); border-top: 2px solid var(--ink); }
