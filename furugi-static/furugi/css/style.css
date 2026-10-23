@@ -1,23 +1,26 @@
 /* Furugi/SECOND°: static frontend styles
    Idea: every piece is one of one, so the site is built around the hangtag.
-   Palette matches the SECOND° noir logo: near-black ground, cream ink,
-   kraft-tan hangtags, a single hanko-red accent for stamps and grading. */
+   Palette matches the SECOND° navy logo: deep navy ground, cream ink,
+   navy hangtags with beige stitching, a single hanko-red accent for stamps and grading. */
 
 :root {
-  --bg: #0b0b0b;        /* page ground, matches the logo's near-black */
-  --bg-soft: #161616;   /* one step up: hover states, panels, inputs */
-  --surface: #000;      /* header/footer band, one step darker than page */
-  --ink: #f2efe9;       /* primary text, the logo's cream */
-  --ink-dim: rgba(242, 239, 233, .68);
-  --line: rgba(242, 239, 233, .16);
-  --field-border: rgba(242, 239, 233, .3);
+  --bg: #0a2040;        /* page ground, the logo's navy */
+  --bg-soft: #112c52;   /* one step up: hover states, panels, inputs */
+  --surface: #061529;   /* header/footer band, one step darker than page */
+  --ink: #f7f4ee;       /* primary text, the logo's cream */
+  --ink-dim: rgba(247, 244, 238, .68);
+  --line: rgba(247, 244, 238, .16);
+  --field-border: rgba(247, 244, 238, .3);
   --ghost-hover: rgba(255, 255, 255, .1);
-  --hero-line: rgba(242, 239, 233, .35);
-  --hero-g1: #1a1a1a; --hero-g2: #0d0d0d; --hero-g3: #050505;
-  --kraft: #cdb68c;     /* hangtag paper \u2014 stays the same in both themes */
-  --kraft-hover: #dcc8a3;
-  --hanko: #c4342b;     /* seal-stamp red \u2014 stays the same in both themes */
-  --dark-text: #0b0b0b; /* always-dark text for light chips (kraft tags, badges) */
+  --hero-line: rgba(247, 244, 238, .35);
+  --hero-g1: #12305c; --hero-g2: #0a2040; --hero-g3: #061529;
+  --kraft: #f7f4ee;     /* accent: cream on dark, navy on light (no more tan) */
+  --kraft-hover: #ffffff;
+  --hanko: #c4342b;     /* seal-stamp red - stays the same in both themes */
+  --dark-text: #0a2040; /* always-dark text for light chips (buttons, cart count) */
+  --tag-bg: #1c4580;    /* hangtag + number badge ground */
+  --stitch: #d9c7a3;    /* beige thread: tag stitching, eyelet ring, twine */
+  --tag-text: #f7f4ee;  /* hangtag text */
 
   --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --body: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -27,19 +30,24 @@
   --wrap: 72rem;
 }
 
-/* Light mode: same structure, inverted ground. Kraft and hanko red are left
-   untouched on purpose, they're accent colours and work on both grounds. */
+/* Light mode: same structure, cream ground with navy ink. Kraft and hanko red
+   are left untouched on purpose, they're accent colours and work on both grounds. */
 :root[data-theme="light"] {
-  --bg: #f5f3ee;
-  --bg-soft: #eae6dd;
+  --bg: #f7f4ee;
+  --bg-soft: #ece7dc;
   --surface: #ffffff;
-  --ink: #16140f;
-  --ink-dim: rgba(22, 20, 15, .65);
-  --line: rgba(22, 20, 15, .13);
-  --field-border: rgba(22, 20, 15, .25);
-  --ghost-hover: rgba(0, 0, 0, .06);
-  --hero-line: rgba(22, 20, 15, .25);
+  --ink: #0a2040;
+  --ink-dim: rgba(10, 32, 64, .68);
+  --line: rgba(10, 32, 64, .14);
+  --field-border: rgba(10, 32, 64, .28);
+  --ghost-hover: rgba(10, 32, 64, .06);
+  --hero-line: rgba(10, 32, 64, .28);
   --hero-g1: #ffffff; --hero-g2: #f2efe8; --hero-g3: #e7e2d6;
+  --tag-bg: #0a2040;
+  --tag-text: #f7f4ee;
+  --kraft: #0a2040;
+  --kraft-hover: #163867;
+  --dark-text: #f7f4ee;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -93,35 +101,43 @@ p { margin: 0; max-width: 62ch; }
 .hero-copy h1 { max-width: 16ch; }
 .hero-copy p { margin-top: var(--s2); font-size: 1.15rem; color: var(--ink-dim); }
 .hero-actions { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
-.rail { position: relative; padding-top: 2.75rem; }
+.rail { position: relative; }
 .rail-label { position: absolute; top: 0; left: 0; margin: -.65rem 0 0; padding: 0 .25rem; background: var(--hero-g1); color: var(--kraft); font: 700 .75rem var(--display); text-transform: uppercase; letter-spacing: .08em; }
 .rail::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--kraft); opacity: .5; }
-.rail-row { list-style: none; margin: 0; padding: 0 1.25rem 3rem; display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x proximity; }
-.rail-row li { flex: none; position: relative; scroll-snap-align: start; }
-.rail-row li::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 2.75rem; background: var(--hero-line); }
+.rail-row { list-style: none; margin: 0; padding: 2.75rem 1.25rem 3rem; display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x proximity; }
+.rail-row li { flex: none; position: relative; scroll-snap-align: start; transform-origin: 50% -2.75rem; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .3)); animation: sway 5s ease-in-out infinite alternate; }
+.rail-row li:nth-child(2n) { animation-duration: 6s; animation-delay: -1.8s; }
+.rail-row li:nth-child(3n) { animation-duration: 4.5s; animation-delay: -3.2s; }
+.rail-row li:hover, .rail-row li:focus-within { animation: swing 1.3s ease-in-out; }
+/* twine: runs from the rail down into the eyelet, painted over the tag */
+.rail-row li::after { content: ""; position: absolute; left: 50%; top: -2.75rem; width: 3px; height: calc(2.75rem + 17px); margin-left: -1.5px; border-radius: 0 0 2px 2px; background: repeating-linear-gradient(160deg, var(--stitch) 0 2px, #a98f5f 2px 4px); pointer-events: none; }
+/* pin where the twine ties onto the rail */
+.rail-row li::before { content: ""; position: absolute; left: 50%; top: -2.75rem; width: 9px; height: 9px; margin: -4px 0 0 -4.5px; border-radius: 50%; background: var(--stitch); }
 .rail-row li:nth-child(odd) .tag { transform: rotate(-1.6deg); }
 .rail-row li:nth-child(even) .tag { transform: rotate(2deg); }
-.tag { position: relative; display: flex; flex-direction: column; gap: .25rem; width: 9.5rem; min-height: 13rem; padding: 2rem .9rem .9rem; background: var(--kraft); color: var(--dark-text); text-decoration: none; transform-origin: 50% 0; clip-path: polygon(12% 0, 88% 0, 100% 9%, 100% 100%, 0 100%, 0 9%); }
-.tag:hover, .tag:focus-visible { animation: swing .7s ease-in-out; }
-.tag-hole { position: absolute; top: .6rem; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--bg); }
+.tag { position: relative; display: flex; flex-direction: column; gap: .25rem; width: 9.5rem; min-height: 13rem; padding: 2rem .9rem .9rem; background: var(--tag-bg); color: var(--tag-text); text-decoration: none; transform-origin: 50% 0; clip-path: polygon(12% 0, 88% 0, 100% 9%, 100% 100%, 0 100%, 0 9%); }
+/* beige stitching that follows the notched outline (dashed line inset from the edge) */
+.tag::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='13.95,3.37 86.05,3.37 95.39,10.37 95.39,96.63 4.61,96.63 4.61,10.37' fill='none' stroke='%23d9c7a3' stroke-width='1.5' stroke-dasharray='5 4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.tag-hole { position: absolute; top: .6rem; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; border: 2.5px solid var(--stitch); background: var(--bg); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3); }
 .tag-no { font-family: var(--mono); font-size: .78rem; letter-spacing: .04em; opacity: .75; }
 .tag strong { font-family: var(--display); font-size: 1rem; font-weight: 800; line-height: 1.2; }
 .tag-meta { font-size: .85rem; }
 .tag-price { margin-top: auto; font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
-@keyframes swing { 0% { rotate: 0deg } 25% { rotate: 4deg } 60% { rotate: -3deg } 100% { rotate: 0deg } }
+@keyframes swing { 0% { rotate: 0deg } 20% { rotate: 6deg } 45% { rotate: -4.5deg } 70% { rotate: 2deg } 100% { rotate: 0deg } }
+@keyframes sway { from { rotate: -1.1deg } to { rotate: 1.1deg } }
 
 /* ---------- Category links ---------- */
 .cats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); border-top: 2px solid var(--ink); }
-.cats a { display: flex; justify-content: space-between; align-items: baseline; padding: 1rem .25rem; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--display); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+.cats a { display: flex; flex-direction: column; gap: .2rem; padding: 1rem .25rem; border-bottom: 1px solid var(--line); text-decoration: none; font-family: var(--display); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
 .cats a:hover { background: var(--bg-soft); }
-.cats span { font: 400 .9rem var(--body); opacity: .6; }
+.cats span { font: 400 .78rem var(--mono); letter-spacing: .06em; opacity: .6; }
 
 /* ---------- Product grid + cards ---------- */
 .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr)); gap: var(--s3) var(--s3); }
 .card { display: block; text-decoration: none; }
 .card-img { position: relative; aspect-ratio: 4 / 5; background: var(--swatch, var(--bg-soft)); overflow: hidden; margin-bottom: .75rem; }
 .card-img img { width: 100%; height: 100%; object-fit: cover; }
-.card .tag-no { position: absolute; left: .6rem; top: .6rem; padding: .15rem .5rem; background: var(--kraft); color: var(--dark-text); opacity: 1; font-weight: 700; }
+.card .tag-no { position: absolute; left: .6rem; top: .6rem; padding: .15rem .5rem; background: var(--tag-bg); color: var(--tag-text); opacity: 1; font-weight: 700; }
 .card h3 { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .2em; }
 .card:hover h3 { text-decoration-color: currentColor; }
 .card .meta { font-size: .9rem; opacity: .7; }
@@ -188,8 +204,8 @@ select:focus-visible, input:focus-visible, textarea:focus-visible { outline-colo
 .site-footer .wrap { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 .site-footer h3 { color: var(--ink); margin-bottom: .4rem; }
 .site-footer a { color: var(--kraft); }
-.footer-mark { height: 3.6rem; width: auto; display: block; margin-bottom: var(--s3); opacity: .92; }
+.footer-mark { height: 5rem; width: auto; display: block; margin-bottom: var(--s3); opacity: .92; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tag:hover, .tag:focus-visible { animation: none; }
+  .rail-row li, .rail-row li:hover, .rail-row li:focus-within { animation: none; }
 }
